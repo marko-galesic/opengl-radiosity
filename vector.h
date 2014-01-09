@@ -1,16 +1,16 @@
 #include <cmath>
 
-namespace vectormath
+namespace Vectormath
 {
-	struct vector
+	struct Vector
 	{
 		float _x;
 		float _y;
 		float _z;
 		float _length;
 
-		vector();
-		vector(float x, float y, float z);
+		Vector();
+		Vector(float x, float y, float z);
 	};
 	
 	struct point
@@ -22,7 +22,7 @@ namespace vectormath
 		point();
 		point(float x, float y, float z);
 	};
-	vector * crossproduct(vector*, vector*);
-	float dotproduct(vector a, vector b);
-	vector * add(point * a, vector * b);
+	Vector * crossproduct(Vector*, Vector*);
+	float dotproduct(Vector a, Vector b);
+	Vector * add(point * a, Vector * b);
 }

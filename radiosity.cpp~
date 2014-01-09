@@ -1,10 +1,10 @@
 #include "radiosity.h"
 
-patch * skyPatch = new patch(new point(0.0, 1.0, 0.0), new vector(0.0, -1.0,  0.0), new vector(0.0, 0.0, 1.0), 1.0, 1.0, 1.0);
-patch * backPatch = new patch(new point(0.0, 0.0, -1.0), new vector(0.0, 0.0,  1.0), new vector(0.0, 1.0, 0.0), 0.8, 0.8, 0.8);
-patch * leftPatch = new patch(new point(-1.0, 0.0, 0.0), new vector(1.0, 0.0,  0.0), new vector(0.0, 1.0, 0.0), 1.0, 0.3, 0.3);
-patch * rightPatch = new patch(new point(1.0, 0.0, 0.0), new vector(-1.0, 0.0,  0.0), new vector(0.0, 1.0, 0.0), 0.3, 1.0, 0.3);
-patch * bottomPatch = new patch(new point(0.0, -1.0, 0.0), new vector(0.0, 1.0,  0.0), new vector(0.0, 0.0, -1.0), 0.8, 0.8, 0.8);
+patch * skyPatch = new patch(new point(0.0, 1.0, 0.0), new Vector(0.0, -1.0,  0.0), new Vector(0.0, 0.0, 1.0), 1.0, 1.0, 1.0);
+patch * backPatch = new patch(new point(0.0, 0.0, -1.0), new Vector(0.0, 0.0,  1.0), new Vector(0.0, 1.0, 0.0), 0.8, 0.8, 0.8);
+patch * leftPatch = new patch(new point(-1.0, 0.0, 0.0), new Vector(1.0, 0.0,  0.0), new Vector(0.0, 1.0, 0.0), 1.0, 0.3, 0.3);
+patch * rightPatch = new patch(new point(1.0, 0.0, 0.0), new Vector(-1.0, 0.0,  0.0), new Vector(0.0, 1.0, 0.0), 0.3, 1.0, 0.3);
+patch * bottomPatch = new patch(new point(0.0, -1.0, 0.0), new Vector(0.0, 1.0,  0.0), new Vector(0.0, 0.0, -1.0), 0.8, 0.8, 0.8);
 
 void calculateExcident(patch * p)
 {
@@ -13,7 +13,7 @@ void calculateExcident(patch * p)
 	p->_excident->_blue = p->_incident->_blue * p->_reflectance->_blue + p->_excident->_blue;
 }
 
-light * calculauteIncidentLight(point * center, vector * normal, vector * up)
+light * calculauteIncidentLight(point * center, Vector * normal, Vector * up)
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -25,27 +25,27 @@ light * calculauteIncidentLight(point * center, vector * normal, vector * up)
 	 * Render hemicube
 	 */
 	// Hemicube left frustrum
-	vector * leftDirection = add(center, crossproduct(up, normal));
+	Vector * leftDirection = add(center, crossproduct(up, normal));
 	renderHemicubeView(center, up, leftDirection, LEFT);
 	
 
 	// Hemicube right frustrum
-	vector * rightDirection = add(center, crossproduct(normal, up));
+	Vector * rightDirection = add(center, crossproduct(normal, up));
 	renderHemicubeView(center, up, rightDirection, RIGHT);
 	
 
 	// Hemicube top frustrum
-	vector * topDirection = add(center, up);
-	vector * reverseNormal = new vector(-normal->_x, -normal->_y, -normal->_z);
+	Vector * topDirection = add(center, up);
+	Vector * reverseNormal = new Vector(-normal->_x, -normal->_y, -normal->_z);
 	renderHemicubeView(center, reverseNormal, topDirection, TOP);
 	
 
 	// Hemicube bottom frustrum
-	vector * bottomDirection = add(center, crossproduct(leftDirection, normal));
+	Vector * bottomDirection = add(center, crossproduct(leftDirection, normal));
 	renderHemicubeView(center, normal, bottomDirection, BOTTOM);
 
 	// Hemicube front 
-	vector * forwardDirection = add(center, normal);
+	Vector * forwardDirection = add(center, normal);
 	renderHemicubeView(center, up, forwardDirection, FRONT);
 
 	hemicube * h = new hemicube();
@@ -193,7 +193,7 @@ void printLight(light * l)
 void radiosity()
 {
 	light * totalLight = new light(0.0, 0.0, 0.0);
-		for(int i = 0; i < iterations; i++)
+		for(int i = 0; i < ITERATIONS; i++)
 		{
 			cout << "Iteration " << i + 1 << "\n";
 			// Render skypatch	
@@ -224,8 +224,6 @@ void radiosity()
 		checkWhetherPatchHasComponentMax(rightPatch, totalLight);
 		checkWhetherPatchHasComponentMax(backPatch, totalLight);
 		checkWhetherPatchHasComponentMax(bottomPatch, totalLight);
-		
-		printLight(totalLight);
 		
 		skyPatch->_excident->_red /= totalLight->_red;
 		skyPatch->_excident->_green /= totalLight->_green;
@@ -319,7 +317,7 @@ void renderScene()
 	glEnd();
 }
 
-void renderHemicubeView(point * center, vector * up, vector * direction, HEMICUBE_VIEW view)
+void renderHemicubeView(point * center, Vector * up, Vector * direction, HEMICUBE_VIEW view)
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -636,10 +634,56 @@ void initializePatches()
 	leftPatch->_excident = leftPatch->_emission;
 	rightPatch->_excident = rightPatch->_emission;
 	backPatch->_excident = backPatch->_emission;
+
+	patches = new patch[shapes.size()];
+
+	for (size_t i = 0; i < shapes.size(); i++)
+	{
+		patches[i]._vertices = new point[shapes[i].mesh.positions.size()];
+		for(size_t v = 0; v < shapes[i].mesh.positions.size() / 3; v++)
+		{
+			float x = shapes[i].mesh.positions[3*v+0];
+			float y = shapes[i].mesh.positions[3*v+1];
+			float z = shapes[i].mesh.positions[3*v+2];
+			
+			
+			patches[i]._vertices->_x = x;
+			patches[i]._vertices->_y = y;
+			patches[i]._vertices->_z = z;
+		}
+		float emission_red = shapes[i].material.emission[0];
+		float emission_green = shapes[i].material.emission[1];
+		float emission_blue = shapes[i].material.emission[2];
+		float diffuse_red = shapes[i].material.diffuse[0];
+		float diffuse_green = shapes[i].material.diffuse[0];
+		float diffuse_blue = shapes[i].material.diffuse[0];
+		
+		patches[i]._emission->_red = emission_red;
+		patches[i]._emission->_green = emission_green;
+		patches[i]._emission->_blue = emission_blue;
+
+		patches[i]._reflectance->_red = diffuse_red;
+		patches[i]._reflectance->_green = diffuse_green;
+		patches[i]._reflectance->_blue = diffuse_blue;
+	}
+		
 }
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
+	string inputfile = argv[1];
+	ITERATIONS = atoi(argv[2]);
+
+	string err = tinyobj::LoadObj(shapes, inputfile.c_str());
+
+	if(!err.empty())
+	{
+		cerr << err << endl;
+		exit(1);
+	}
+
+	cout << "Running radiosity on " << inputfile << " with " << ITERATIONS << " iterations.\n";
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE);
 	glutInitWindowSize(WINDOW_WIDTH,WINDOW_HEIGHT);

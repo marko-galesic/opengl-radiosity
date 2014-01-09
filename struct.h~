@@ -21,7 +21,7 @@ namespace radiosity_structs
 		point * _center;
 		Vector * _normal;
 		Vector * _up;
-		point * _vertices;
+		point * vertices;
 		
 		patch();
 		patch(point * center, Vector * normal, Vector * up, float r, float g, float b);

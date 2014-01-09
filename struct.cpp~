@@ -30,7 +30,7 @@ patch::patch()
 	this->_reflectance = new light(1.0, 1.0, 1.0);
 	this->_incident = new light(0.0, 0.0, 0.0);
 	this->_excident = new light(0.0, 0.0, 0.0);
-	this->_vertices = new point[1];
+	this->vertices = new point[1];
 }
 
 patch::patch(point * center, Vector * normal, Vector * up, float r, float g, float b, point * vertices)
