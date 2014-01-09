@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <stdlib.h>
+#include <pngwriter.h>
 
 using namespace std;
 using namespace radiosity_structs;
