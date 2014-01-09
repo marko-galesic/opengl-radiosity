@@ -5,7 +5,7 @@ A Radiosity Implementation with Hemicubes and OpenGL
 
 Use: 
 
-g++ -o radiosity radiosity.cpp struct.cpp vector.cpp -lGLU -lGL -lglut -lpngwriter -lpng -DNO_FREETYPE
+g++ -o radiosity radiosity.cpp struct.cpp vector.cpp -lGLU -lGL -lglut
 
 to compile
 
