@@ -455,7 +455,6 @@ unsigned char * applyMultiplier(unsigned char * buffer, HEMICUBE_VIEW view)
 	/* 
 	 * Apply "Mulitiplier Hemicube"
 	 */
-	//pngwriter png(WIDTH,HEIGHT,0, viewName);
 	float yawPxCamera = START_ANGLE_PX_CAMERA_X;	// Yaw (in degrees) between the current pixel's center and the direction of the camera
 	float pitchPxCamera = START_ANGLE_PX_CAMERA_Y;	// Pitch (in degrees) between the current pixel's center and the direction of the camera
 
@@ -483,8 +482,6 @@ unsigned char * applyMultiplier(unsigned char * buffer, HEMICUBE_VIEW view)
 		buffer[i] = redComponent;
 		buffer[i + 1] = greenComponent;
 		buffer[i + 2] = blueComponent;
-
-		//png.plot(pixelX, pixelY, (float)buffer[i] / 255, (float)buffer[i + 1] / 255, (float)buffer[i + 2] / 255);
 
 		yawPxCamera -= PIXEL_WIDTH_IN_DEGREES;
 		switch(view)

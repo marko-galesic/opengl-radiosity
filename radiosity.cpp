@@ -225,8 +225,6 @@ void radiosity()
 		checkWhetherPatchHasComponentMax(backPatch, totalLight);
 		checkWhetherPatchHasComponentMax(bottomPatch, totalLight);
 		
-		printLight(totalLight);
-		
 		skyPatch->_excident->_red /= totalLight->_red;
 		skyPatch->_excident->_green /= totalLight->_green;
 		skyPatch->_excident->_blue /= totalLight->_blue;
