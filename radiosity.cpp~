@@ -654,6 +654,7 @@ void initializePatches()
 		float emission_red = shapes[i].material.emission[0];
 		float emission_green = shapes[i].material.emission[1];
 		float emission_blue = shapes[i].material.emission[2];
+
 		float diffuse_red = shapes[i].material.diffuse[0];
 		float diffuse_green = shapes[i].material.diffuse[0];
 		float diffuse_blue = shapes[i].material.diffuse[0];
@@ -665,6 +666,11 @@ void initializePatches()
 		patches[i]._reflectance->_red = diffuse_red;
 		patches[i]._reflectance->_green = diffuse_green;
 		patches[i]._reflectance->_blue = diffuse_blue;
+
+		
+		patches[i]._excident->_red = diffuse_red;
+		patches[i]._excident->_green = diffuse_green;
+		patches[i]._excident->_blue = diffuse_blue;
 	}
 		
 }

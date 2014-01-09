@@ -666,6 +666,11 @@ void initializePatches()
 		patches[i]._reflectance->_red = diffuse_red;
 		patches[i]._reflectance->_green = diffuse_green;
 		patches[i]._reflectance->_blue = diffuse_blue;
+
+		
+		patches[i]._excident->_red = patches[i]._emission->_red;
+		patches[i]._excident->_green = patches[i]._emission->_green;
+		patches[i]._excident->_blue = patches[i]._emission->_blue;
 	}
 		
 }
