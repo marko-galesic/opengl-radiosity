@@ -1,5 +1,5 @@
 #include <cmath>
-#include "ector.h"
+#include "vector.h"
 
 using namespace Vectormath;
 
@@ -58,3 +58,31 @@ Vector * Vectormath::add(point * a, Vector * b)
 
 	return c;
 }
+
+float Vectormath::length(Vector * a)
+{
+	return sqrt(pow(a->_x, 2) + pow(a->_y, 2) + pow(a->_z, 2));
+}
+
+void Vectormath::normalize(Vector * a)
+{
+	float length = Vectormath::length(a);
+
+	a->_x /= length;
+	a->_y /= length;
+	a->_z /= length;
+}
+
+Vectormath::Vector * getVector(point * a, point * b)
+{
+	Vector * c = new Vector(0.0,0.0,0.0);
+
+	c->_x = b->_x - a->_x;	
+	c->_y = b->_y - a->_y;	
+	c->_z = b->_z - a->_z;	 
+
+	normalize(c);
+
+	return c;	
+}
+

@@ -639,18 +639,19 @@ void initializePatches()
 
 	for (size_t i = 0; i < shapes.size(); i++)
 	{
-		patches[i]._vertices = new point[shapes[i].mesh.positions.size()];
-		for(size_t v = 0; v < shapes[i].mesh.positions.size() / 3; v++)
+		patches[i]._vertices = new point[shapes[i].mesh.positions.size() / 3];
+		int numberVertices = shapes[i].mesh.positions.size() / 3;
+		for(size_t v = 0; v < numberVertices; v++)
 		{
 			float x = shapes[i].mesh.positions[3*v+0];
 			float y = shapes[i].mesh.positions[3*v+1];
 			float z = shapes[i].mesh.positions[3*v+2];
 			
-			
-			patches[i]._vertices->_x = x;
-			patches[i]._vertices->_y = y;
-			patches[i]._vertices->_z = z;
+			patches[i]._vertices[v]._x = x;
+			patches[i]._vertices[v]._y = y;
+			patches[i]._vertices[v]._z = z;
 		}
+	
 		float emission_red = shapes[i].material.emission[0];
 		float emission_green = shapes[i].material.emission[1];
 		float emission_blue = shapes[i].material.emission[2];
@@ -667,10 +668,40 @@ void initializePatches()
 		patches[i]._reflectance->_green = diffuse_green;
 		patches[i]._reflectance->_blue = diffuse_blue;
 
+		patches[i]._excident->_red = patches[i]._emission->_red;
+		patches[i]._excident->_green = patches[i]._emission->_green;
+		patches[i]._excident->_blue = patches[i]._emission->_blue;
 		
-		patches[i]._excident->_red = diffuse_red;
-		patches[i]._excident->_green = diffuse_green;
-		patches[i]._excident->_blue = diffuse_blue;
+		// Calculate normal
+		Vector * a = getVector(&patches[i]._vertices[0], &patches[i]._vertices[1]);
+		Vector * b = getVector(&patches[i]._vertices[1], &patches[i]._vertices[2]);
+		/*
+		patches[i]._normal = crossproduct(a, b);
+		normalize(patches[i]._normal);
+
+		// Calculate up vector
+		Vector * right = crossproduct(patches[i]._normal, new Vector(0.0, 1.0, 0.0));
+		
+		Vector * upVector = crossproduct(right, patches[i]._normal);
+
+		patches[i]._up = upVector;
+
+
+		// Calculate center point
+		float centerX = 0;
+		float centerY = 0;
+		float centerZ = 0;			
+		for(int v = 0; v < numberVertices; v++)
+		{
+			centerX += patches[i]._vertices[v]._x;
+			centerY += patches[i]._vertices[v]._y;
+			centerZ += patches[i]._vertices[v]._z;
+		}
+
+		centerX /= numberVertices;
+		centerY /= numberVertices;
+		centerZ /= numberVertices;
+		*/
 	}
 		
 }
