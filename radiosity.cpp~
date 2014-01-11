@@ -6,6 +6,97 @@ patch * leftPatch = new patch(new point(-1.0, 0.0, 0.0), new Vector(1.0, 0.0,  0
 patch * rightPatch = new patch(new point(1.0, 0.0, 0.0), new Vector(-1.0, 0.0,  0.0), new Vector(0.0, 1.0, 0.0), 0.3, 1.0, 0.3);
 patch * bottomPatch = new patch(new point(0.0, -1.0, 0.0), new Vector(0.0, 1.0,  0.0), new Vector(0.0, 0.0, -1.0), 0.8, 0.8, 0.8);
 
+
+void radiosity()
+{
+	light * totalLight = new light(0.0, 0.0, 0.0);
+		for(int i = 0; i < ITERATIONS; i++)
+		{
+			cout << "Iteration " << i + 1 << "\n";
+			/*
+			// Render skypatch	
+			renderPatch(skyPatch);			
+			
+			// Render left	
+			renderPatch(leftPatch);
+
+			// Render right	
+			renderPatch(rightPatch);
+
+			// Render back	
+			renderPatch(backPatch);
+			
+			// Render bottom	
+			renderPatch(bottomPatch);
+			*/
+			for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+			{
+				renderPatch(&patches[p]);	
+			}
+			for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+			{
+				calculateExcident(&patches[p]);	
+				if (DEBUG) cout << "Color After Excident Calculation: " << patches[p]._excident->_red << " " << patches[p]._excident->_green << " " << patches[p]._excident->_blue << endl;
+			}
+			/*
+			calculateExcident(skyPatch);
+			calculateExcident(leftPatch);
+			calculateExcident(rightPatch);
+			calculateExcident(backPatch);
+			calculateExcident(bottomPatch);
+			*/
+						
+		}
+		for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+		{
+			checkWhetherPatchHasComponentMax(&patches[p], totalLight);	
+		}
+
+		for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+		{
+			patches[p]._excident->_red /= totalLight->_red;
+			patches[p]._excident->_green /= totalLight->_green;
+			patches[p]._excident->_blue /= totalLight->_blue;
+		}
+		/*
+		checkWhetherPatchHasComponentMax(skyPatch, totalLight);
+		checkWhetherPatchHasComponentMax(leftPatch, totalLight);
+		checkWhetherPatchHasComponentMax(rightPatch, totalLight);
+		checkWhetherPatchHasComponentMax(backPatch, totalLight);
+		checkWhetherPatchHasComponentMax(bottomPatch, totalLight);
+		
+		skyPatch->_excident->_red /= totalLight->_red;
+		skyPatch->_excident->_green /= totalLight->_green;
+		skyPatch->_excident->_blue /= totalLight->_blue;
+	
+		leftPatch->_excident->_red /= totalLight->_red;
+		leftPatch->_excident->_green /= totalLight->_green;
+		leftPatch->_excident->_blue /= totalLight->_blue;
+
+		rightPatch->_excident->_red /= totalLight->_red;
+		rightPatch->_excident->_green /= totalLight->_green;
+		rightPatch->_excident->_blue /= totalLight->_blue;	
+
+		backPatch->_excident->_red /= totalLight->_red;
+		backPatch->_excident->_green /= totalLight->_green;
+		backPatch->_excident->_blue /= totalLight->_blue;
+		
+		bottomPatch->_excident->_red /= totalLight->_red;
+		bottomPatch->_excident->_green /= totalLight->_green;
+		bottomPatch->_excident->_blue /= totalLight->_blue;
+		*/
+}
+void renderPatch(patch * p)
+{
+	// Render bottom	
+	light * incident = calculauteIncidentLight(p->_center, p->_normal, p->_up);
+	p->_incident->_red = incident->_red;
+	p->_incident->_green = incident->_green;
+	p->_incident->_blue = incident->_blue;
+	if (DEBUG) cout << "Color After Incident Calculation: " << p->_incident->_red << " " << p->_incident->_green << " " << p->_incident->_blue << endl;
+
+}
+
 void calculateExcident(patch * p)
 {
 	p->_excident->_red = p->_incident->_red * p->_reflectance->_red + p->_excident->_red;
@@ -150,16 +241,6 @@ light * getTotalLightOfView(hemicube * h, HEMICUBE_VIEW view)
 	return totalLightOfView;
 }
 
-void renderPatch(patch * p)
-{
-	// Render bottom	
-	light * incident = calculauteIncidentLight(p->_center, p->_normal, p->_up);
-	p->_incident->_red = incident->_red;
-	p->_incident->_green = incident->_green;
-	p->_incident->_blue = incident->_blue;
-
-}
-
 void checkWhetherPatchHasComponentMax(patch * p, light * totalLight)
 {
 	if (p->_excident->_red > totalLight->_red )
@@ -190,61 +271,6 @@ void printLight(light * l)
 	cout << l->_red << " " << l->_green << " " << l->_blue << "\n";
 }
 
-void radiosity()
-{
-	light * totalLight = new light(0.0, 0.0, 0.0);
-		for(int i = 0; i < ITERATIONS; i++)
-		{
-			cout << "Iteration " << i + 1 << "\n";
-			// Render skypatch	
-			renderPatch(skyPatch);			
-			
-			// Render left	
-			renderPatch(leftPatch);
-
-			// Render right	
-			renderPatch(rightPatch);
-
-			// Render back	
-			renderPatch(backPatch);
-			
-			// Render bottom	
-			renderPatch(bottomPatch);
-		
-			calculateExcident(skyPatch);
-			calculateExcident(leftPatch);
-			calculateExcident(rightPatch);
-			calculateExcident(backPatch);
-			calculateExcident(bottomPatch);
-						
-		}
-		
-		checkWhetherPatchHasComponentMax(skyPatch, totalLight);
-		checkWhetherPatchHasComponentMax(leftPatch, totalLight);
-		checkWhetherPatchHasComponentMax(rightPatch, totalLight);
-		checkWhetherPatchHasComponentMax(backPatch, totalLight);
-		checkWhetherPatchHasComponentMax(bottomPatch, totalLight);
-		
-		skyPatch->_excident->_red /= totalLight->_red;
-		skyPatch->_excident->_green /= totalLight->_green;
-		skyPatch->_excident->_blue /= totalLight->_blue;
-	
-		leftPatch->_excident->_red /= totalLight->_red;
-		leftPatch->_excident->_green /= totalLight->_green;
-		leftPatch->_excident->_blue /= totalLight->_blue;
-
-		rightPatch->_excident->_red /= totalLight->_red;
-		rightPatch->_excident->_green /= totalLight->_green;
-		rightPatch->_excident->_blue /= totalLight->_blue;	
-
-		backPatch->_excident->_red /= totalLight->_red;
-		backPatch->_excident->_green /= totalLight->_green;
-		backPatch->_excident->_blue /= totalLight->_blue;
-		
-		bottomPatch->_excident->_red /= totalLight->_red;
-		bottomPatch->_excident->_green /= totalLight->_green;
-		bottomPatch->_excident->_blue /= totalLight->_blue;/**/
-}
 
 void renderFunction()
 {
@@ -260,13 +286,29 @@ void renderFunction()
 	glMatrixMode(GL_MODELVIEW);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glLoadIdentity();
-	gluLookAt(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0); 
+	gluLookAt(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	renderScene();
 	glFlush();
 }
 
+// TODO : should renderScene get passed patches * as a parameter?
+
 void renderScene()
 {
+	for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+	{
+		glColor3f(patches[p]._excident->_red, patches[p]._excident->_green, patches[p]._excident->_blue);
+		
+		if (DEBUG) cout << "Color : " << patches[p]._excident->_red << " " << patches[p]._excident->_green << " " << patches[p]._excident->_blue << endl;
+		glBegin(GL_POLYGON);
+		for(int v = 0; v < patches[p].numVerts; v++)
+		{
+			//cout << patches[p]._vertices[v]._x << " " << patches[p]._vertices[v]._y << " " << patches[p]._vertices[v]._z << endl;
+			glVertex3f(patches[p]._vertices[v]._x, patches[p]._vertices[v]._y, patches[p]._vertices[v]._z);
+		}
+		glEnd();
+	}
+	/*
 	glColor3f(bottomPatch->_excident->_red, bottomPatch->_excident->_green, bottomPatch->_excident->_blue);
 	// Bottom patch
 	glBegin(GL_POLYGON);
@@ -315,6 +357,7 @@ void renderScene()
 		glVertex3f(-1.0, 1.0, -1.0);
 		glVertex3f(1.0, 1.0, -1.0);
 	glEnd();
+	*/
 }
 
 void renderHemicubeView(point * center, Vector * up, Vector * direction, HEMICUBE_VIEW view)
@@ -627,6 +670,7 @@ unsigned char * getHemicubePixels(HEMICUBE_VIEW view)
 
 void initializePatches()
 {
+	if(DEBUG) cout << "Generating patches from obj file... \n";
 	skyPatch->_emission = new light(1.0, 1.0, 1.0);
 
 	skyPatch->_excident = skyPatch->_emission;
@@ -636,13 +680,18 @@ void initializePatches()
 	backPatch->_excident = backPatch->_emission;
 
 	patches = new patch[shapes.size()];
-
+	
+	NUMBER_OF_PATCHES = shapes.size();
+	int verts = 0;	
 	for (size_t i = 0; i < shapes.size(); i++)
-	{
-		patches[i]._vertices = new point[shapes[i].mesh.positions.size() / 3];
+	{	
 		int numberVertices = shapes[i].mesh.positions.size() / 3;
+		patches[i]._vertices = new point[numberVertices];
+		if(DEBUG) cout << "Patch " << shapes[i].name.c_str() << endl;
 		for(size_t v = 0; v < numberVertices; v++)
 		{
+			verts++;
+			/**/
 			float x = shapes[i].mesh.positions[3*v+0];
 			float y = shapes[i].mesh.positions[3*v+1];
 			float z = shapes[i].mesh.positions[3*v+2];
@@ -650,6 +699,8 @@ void initializePatches()
 			patches[i]._vertices[v]._x = x;
 			patches[i]._vertices[v]._y = y;
 			patches[i]._vertices[v]._z = z;
+			if(DEBUG) cout << verts << " " << patches[i]._vertices[v]._x << " " << patches[i]._vertices[v]._y << " " << patches[i]._vertices[v]._z << endl;
+			
 		}
 	
 		float emission_red = shapes[i].material.emission[0];
@@ -671,13 +722,18 @@ void initializePatches()
 		patches[i]._excident->_red = patches[i]._emission->_red;
 		patches[i]._excident->_green = patches[i]._emission->_green;
 		patches[i]._excident->_blue = patches[i]._emission->_blue;
+
+		if(DEBUG) cout << "Emission    : " << patches[i]._emission->_red << " " << patches[i]._emission->_green << " " << patches[i]._emission->_blue << endl;
+		if(DEBUG) cout << "Reflectance : " << patches[i]._reflectance->_red << " " << patches[i]._reflectance->_green << " " << patches[i]._reflectance->_blue << endl;
 		
 		// Calculate normal
 		Vector * a = getVector(&patches[i]._vertices[0], &patches[i]._vertices[1]);
 		Vector * b = getVector(&patches[i]._vertices[1], &patches[i]._vertices[2]);
-		/*
+		
 		patches[i]._normal = crossproduct(a, b);
 		normalize(patches[i]._normal);
+
+		if(DEBUG) cout << "Normal     : " << patches[i]._normal->_x << " " << patches[i]._normal->_y << " " << patches[i]._normal->_z << endl;
 
 		// Calculate up vector
 		Vector * right = crossproduct(patches[i]._normal, new Vector(0.0, 1.0, 0.0));
@@ -686,6 +742,14 @@ void initializePatches()
 
 		patches[i]._up = upVector;
 
+		if(patches[i]._up->_x == 0.0 && patches[i]._up->_y == 0.0 && patches[i]._up->_z == 0.0)
+		{
+			patches[i]._up->_x = 0;
+			patches[i]._up->_y = 0;
+			patches[i]._up->_z = -1;
+		}
+		
+		if(DEBUG) cout << "Up        : " << patches[i]._up->_x << " " << patches[i]._up->_y << " " << patches[i]._up->_z << endl;
 
 		// Calculate center point
 		float centerX = 0;
@@ -698,18 +762,27 @@ void initializePatches()
 			centerZ += patches[i]._vertices[v]._z;
 		}
 
+		patches[i].numVerts = numberVertices;
+
+
 		centerX /= numberVertices;
 		centerY /= numberVertices;
 		centerZ /= numberVertices;
-		*/
+
+		patches[i]._center = new point(centerX, centerY, centerZ);
+
+		if(DEBUG) cout << "Center        : " << patches[i]._center->_x << " " << patches[i]._center->_y << " " << patches[i]._center->_z << endl;
 	}
+	if(DEBUG) cout << NUMBER_OF_PATCHES << " patches" << endl;
 		
 }
 
 int main(int argc, char* argv[])
 {
+	
 	string inputfile = argv[1];
 	ITERATIONS = atoi(argv[2]);
+	if(atoi(argv[3]) == 1) DEBUG = true;
 
 	string err = tinyobj::LoadObj(shapes, inputfile.c_str());
 
@@ -721,13 +794,15 @@ int main(int argc, char* argv[])
 
 	cout << "Running radiosity on " << inputfile << " with " << ITERATIONS << " iterations.\n";
 
+	initializePatches();
+	
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE);
 	glutInitWindowSize(WINDOW_WIDTH,WINDOW_HEIGHT);
 	glutInitWindowPosition(100,100);
     	glutCreateWindow("OpenGL - First window demo");
-	initializePatches();
 	glutDisplayFunc(renderFunction);
-	glutMainLoop();    
+	glutMainLoop();
+	/**/
 	return 0;
 }
