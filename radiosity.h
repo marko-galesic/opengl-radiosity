@@ -25,6 +25,7 @@ light * getTotalLightOfView(hemicube * h, HEMICUBE_VIEW view);
 void calculateExcident(patch * p);
 void renderPatch(patch * p);
 void renderScene();
+void printLight(light * l);
 int ITERATIONS = 0;
 int NUMBER_OF_PATCHES = 0;
 bool running = true;

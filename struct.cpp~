@@ -1,6 +1,5 @@
 #include "struct.h"
-
-
+#include <iostream>
 using namespace radiosity_structs;
 
 light::light(float red, float green, float blue)
@@ -30,7 +29,7 @@ patch::patch()
 	this->_reflectance = new light(1.0, 1.0, 1.0);
 	this->_incident = new light(0.0, 0.0, 0.0);
 	this->_excident = new light(0.0, 0.0, 0.0);
-	this->vertices = new point[1];
+	this->_vertices = new point[1];
 }
 
 patch::patch(point * center, Vector * normal, Vector * up, float r, float g, float b, point * vertices)
@@ -43,4 +42,14 @@ patch::patch(point * center, Vector * normal, Vector * up, float r, float g, flo
 	this->_incident = new light(0.0, 0.0, 0.0);
 	this->_excident = new light(0.0, 0.0, 0.0);
 	this->_vertices = vertices;
+}
+
+hemicube::~hemicube()
+{
+	if(this->_left) delete this->_left;
+	if(this->_right) delete this->_right;
+	if(this->_top) delete this->_top;
+	if(this->_bottom) delete this->_bottom;
+	if(this->_front) delete this->_front;
+	std::cout << "hemicube deleted";
 }

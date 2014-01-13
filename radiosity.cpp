@@ -1,5 +1,6 @@
 #include "radiosity.h"
 
+// TODO : levels for debug output
 patch * skyPatch = new patch(new point(0.0, 1.0, 0.0), new Vector(0.0, -1.0,  0.0), new Vector(0.0, 0.0, 1.0), 1.0, 1.0, 1.0);
 patch * backPatch = new patch(new point(0.0, 0.0, -1.0), new Vector(0.0, 0.0,  1.0), new Vector(0.0, 1.0, 0.0), 0.8, 0.8, 0.8);
 patch * leftPatch = new patch(new point(-1.0, 0.0, 0.0), new Vector(1.0, 0.0,  0.0), new Vector(0.0, 1.0, 0.0), 1.0, 0.3, 0.3);
@@ -12,78 +13,40 @@ void radiosity()
 	light * totalLight = new light(0.0, 0.0, 0.0);
 		for(int i = 0; i < ITERATIONS; i++)
 		{
-			cout << "Iteration " << i + 1 << "\n";
-			/*
-			// Render skypatch	
-			renderPatch(skyPatch);			
-			
-			// Render left	
-			renderPatch(leftPatch);
-
-			// Render right	
-			renderPatch(rightPatch);
-
-			// Render back	
-			renderPatch(backPatch);
-			
-			// Render bottom	
-			renderPatch(bottomPatch);
-			*/
 			for(int p = 0; p < NUMBER_OF_PATCHES; p++)
 			{
+				cout << "\r" << "Calculating incident lighting\t" << ((float)p / (float)NUMBER_OF_PATCHES)  * 100 << "%"<< flush;
 				renderPatch(&patches[p]);	
 			}
+			cout << endl;
 			for(int p = 0; p < NUMBER_OF_PATCHES; p++)
 			{
+				cout << "\r" << "Calculating excident lighting\t" << ((float)p / (float)NUMBER_OF_PATCHES)  * 100 << "%"<< flush;
 				calculateExcident(&patches[p]);	
 				if (DEBUG) cout << "Color After Excident Calculation: " << patches[p]._excident->_red << " " << patches[p]._excident->_green << " " << patches[p]._excident->_blue << endl;
 			}
-			/*
-			calculateExcident(skyPatch);
-			calculateExcident(leftPatch);
-			calculateExcident(rightPatch);
-			calculateExcident(backPatch);
-			calculateExcident(bottomPatch);
-			*/
+			cout << endl;
 						
 		}
+		/*
 		for(int p = 0; p < NUMBER_OF_PATCHES; p++)
 		{
 			checkWhetherPatchHasComponentMax(&patches[p], totalLight);	
 		}
+		
+		printLight(totalLight);		
 
 		for(int p = 0; p < NUMBER_OF_PATCHES; p++)
 		{
-			patches[p]._excident->_red /= totalLight->_red;
-			patches[p]._excident->_green /= totalLight->_green;
-			patches[p]._excident->_blue /= totalLight->_blue;
+			//patches[p]._excident->_red /= totalLight->_red;
+			//patches[p]._excident->_green /= totalLight->_green;
+			//patches[p]._excident->_blue /= totalLight->_blue;
+
+			if (patches[p]._excident->_red != 0.0 || patches[p]._excident->_green != 0.0 || patches[p]._excident->_blue)
+			{
+				if (DEBUG) cout << patches[p]._excident->_red << " " << patches[p]._excident->_green << " " << patches[p]._excident->_blue << endl;
+			}
 		}
-		/*
-		checkWhetherPatchHasComponentMax(skyPatch, totalLight);
-		checkWhetherPatchHasComponentMax(leftPatch, totalLight);
-		checkWhetherPatchHasComponentMax(rightPatch, totalLight);
-		checkWhetherPatchHasComponentMax(backPatch, totalLight);
-		checkWhetherPatchHasComponentMax(bottomPatch, totalLight);
-		
-		skyPatch->_excident->_red /= totalLight->_red;
-		skyPatch->_excident->_green /= totalLight->_green;
-		skyPatch->_excident->_blue /= totalLight->_blue;
-	
-		leftPatch->_excident->_red /= totalLight->_red;
-		leftPatch->_excident->_green /= totalLight->_green;
-		leftPatch->_excident->_blue /= totalLight->_blue;
-
-		rightPatch->_excident->_red /= totalLight->_red;
-		rightPatch->_excident->_green /= totalLight->_green;
-		rightPatch->_excident->_blue /= totalLight->_blue;	
-
-		backPatch->_excident->_red /= totalLight->_red;
-		backPatch->_excident->_green /= totalLight->_green;
-		backPatch->_excident->_blue /= totalLight->_blue;
-		
-		bottomPatch->_excident->_red /= totalLight->_red;
-		bottomPatch->_excident->_green /= totalLight->_green;
-		bottomPatch->_excident->_blue /= totalLight->_blue;
 		*/
 }
 void renderPatch(patch * p)
@@ -94,7 +57,7 @@ void renderPatch(patch * p)
 	p->_incident->_green = incident->_green;
 	p->_incident->_blue = incident->_blue;
 	if (DEBUG) cout << "Color After Incident Calculation: " << p->_incident->_red << " " << p->_incident->_green << " " << p->_incident->_blue << endl;
-
+	delete incident;
 }
 
 void calculateExcident(patch * p)
@@ -177,8 +140,13 @@ light * calculauteIncidentLight(point * center, Vector * normal, Vector * up)
 	totalLight->_red /= totalPixels;
 	totalLight->_green /= totalPixels;
 	totalLight->_blue /= totalPixels;
-
-
+	
+	delete h;
+	delete topView;
+	delete bottomView;
+	delete leftView;
+	delete rightView;
+	delete frontView;
 	return totalLight;
 }
 
@@ -238,6 +206,7 @@ light * getTotalLightOfView(hemicube * h, HEMICUBE_VIEW view)
 			pixelY++;
 		}
 	}
+	//delete viewName;
 	return totalLightOfView;
 }
 
@@ -303,61 +272,11 @@ void renderScene()
 		glBegin(GL_POLYGON);
 		for(int v = 0; v < patches[p].numVerts; v++)
 		{
-			//cout << patches[p]._vertices[v]._x << " " << patches[p]._vertices[v]._y << " " << patches[p]._vertices[v]._z << endl;
+			if (DEBUG) cout << patches[p]._vertices[v]._x << " " << patches[p]._vertices[v]._y << " " << patches[p]._vertices[v]._z << endl;
 			glVertex3f(patches[p]._vertices[v]._x, patches[p]._vertices[v]._y, patches[p]._vertices[v]._z);
 		}
 		glEnd();
 	}
-	/*
-	glColor3f(bottomPatch->_excident->_red, bottomPatch->_excident->_green, bottomPatch->_excident->_blue);
-	// Bottom patch
-	glBegin(GL_POLYGON);
-		glVertex3f(-1.0, -1.0, 1.0);
-		glVertex3f(-1.0, -1.0, -1.0);
-		glVertex3f(1.0, -1.0, -1.0);
-		glVertex3f(1.0, -1.0, 1.0);
-	glEnd();
-
-	
-	glColor3f(backPatch->_excident->_red, backPatch->_excident->_green, backPatch->_excident->_blue);
-	// Back patch
-	glBegin(GL_POLYGON);
-		glVertex3f(-1.0, -1.0, -1.0);
-		glVertex3f(-1.0, 1.0, -1.0);
-		glVertex3f(1.0, 1.0, -1.0);
-		glVertex3f(1.0, -1.0, -1.0);
-	glEnd();
-	
-
-	glColor3f(leftPatch->_excident->_red, leftPatch->_excident->_green, leftPatch->_excident->_blue);
-	// Left patch
-	glBegin(GL_POLYGON);
-		glVertex3f(-1.0, -1.0, 1.0);
-		glVertex3f(-1.0, 1.0, 1.0);
-		glVertex3f(-1.0, 1.0, -1.0);
-		glVertex3f(-1.0, -1.0, -1.0);
-	glEnd();
-	
-
-	glColor3f(rightPatch->_excident->_red, rightPatch->_excident->_green, rightPatch->_excident->_blue);
-	// Right patch
-	glBegin(GL_POLYGON);
-		glVertex3f(1.0, 1.0, 1.0);
-		glVertex3f(1.0, 1.0, -1.0);
-		glVertex3f(1.0, -1.0, -1.0);
-		glVertex3f(1.0, -1.0, 1.0);
-	glEnd();
-	
-
-	glColor3f(skyPatch->_excident->_red, skyPatch->_excident->_green, skyPatch->_excident->_blue);
-	// Sky patch
-	glBegin(GL_POLYGON);
-		glVertex3f(1.0, 1.0, 1.0);
-		glVertex3f(-1.0, 1.0, 1.0);
-		glVertex3f(-1.0, 1.0, -1.0);
-		glVertex3f(1.0, 1.0, -1.0);
-	glEnd();
-	*/
 }
 
 void renderHemicubeView(point * center, Vector * up, Vector * direction, HEMICUBE_VIEW view)
@@ -507,15 +426,16 @@ unsigned char * applyMultiplier(unsigned char * buffer, HEMICUBE_VIEW view)
 	float twoPi = 2.0 * 3.14159265359;
 	for(int i = 0; i < WIDTH * HEIGHT * 3; i+=3)
 	{	
-		float perspectiveCompensationX = (abs(yawPxCamera) / 360.0) * twoPi;
-		float perspectiveCompensationY = (abs(pitchPxCamera) / 360.0) * twoPi;
+		float perspectiveCompensationX = (yawPxCamera / 360.0) * twoPi;
+		float perspectiveCompensationY = (pitchPxCamera / 360.0) * twoPi;
 
-		float lambertCompensationX = (abs(yawPxPatch) / 360.0) * twoPi;
-		float lambertCompensationY = (abs(pitchPxPatch) / 360.0) * twoPi;
+		float lambertCompensationX = (yawPxPatch / 360.0) * twoPi;
+		float lambertCompensationY = (pitchPxPatch / 360.0) * twoPi;
 		 
 		float perspectiveCompnesation = cos(perspectiveCompensationX) * cos(perspectiveCompensationY);
 		float lambertCompensation = cos(lambertCompensationX) * cos(lambertCompensationY);
-
+		
+		// TODO : unit conversion from 0 - 255 to 0 - 1 (?)
 		float redComponent = (int)buffer[i] * perspectiveCompnesation * lambertCompensation;
 		float greenComponent = (int)buffer[i + 1] * perspectiveCompnesation * lambertCompensation;
 		float blueComponent = (int)buffer[i + 2] * perspectiveCompnesation * lambertCompensation;
@@ -772,6 +692,13 @@ void initializePatches()
 		patches[i]._center = new point(centerX, centerY, centerZ);
 
 		if(DEBUG) cout << "Center        : " << patches[i]._center->_x << " " << patches[i]._center->_y << " " << patches[i]._center->_z << endl;
+
+		/*
+		delete right;
+		delete upVector;
+		delete a;
+		delete b;
+		*/
 	}
 	if(DEBUG) cout << NUMBER_OF_PATCHES << " patches" << endl;
 		

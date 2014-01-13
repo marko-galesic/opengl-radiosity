@@ -25,7 +25,7 @@ light * getTotalLightOfView(hemicube * h, HEMICUBE_VIEW view);
 void calculateExcident(patch * p);
 void renderPatch(patch * p);
 void renderScene();
-int ITERATIONS = 1;
+int ITERATIONS = 0;
 int NUMBER_OF_PATCHES = 0;
 bool running = true;
 vector<tinyobj::shape_t> shapes;

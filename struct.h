@@ -36,5 +36,7 @@ namespace radiosity_structs
 		unsigned char * _top;
 		unsigned char * _bottom;
 		unsigned char * _front;
+
+		~hemicube();
 	};
 }

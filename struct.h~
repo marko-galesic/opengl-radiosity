@@ -10,6 +10,7 @@ namespace radiosity_structs
 		float _green;
 		float _blue;
 		light(float red, float green, float blue);
+		~light();
 	};
 
 	struct patch
@@ -22,6 +23,7 @@ namespace radiosity_structs
 		Vector * _normal;
 		Vector * _up;
 		point * _vertices;
+		int numVerts;
 		
 		patch();
 		patch(point * center, Vector * normal, Vector * up, float r, float g, float b);
@@ -35,5 +37,7 @@ namespace radiosity_structs
 		unsigned char * _top;
 		unsigned char * _bottom;
 		unsigned char * _front;
+
+		~hemicube();
 	};
 }
