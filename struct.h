@@ -11,6 +11,13 @@ namespace radiosity_structs
 		float _blue;
 		light(float red, float green, float blue);
 	};
+	
+	struct patchId
+	{
+		int _red;
+		int _green;
+		int _blue;
+	};
 
 	struct patch
 	{
@@ -23,7 +30,8 @@ namespace radiosity_structs
 		Vector * _up;
 		point * _vertices;
 		int numVerts;
-		
+		int id;
+		patchId * _id;
 		patch();
 		patch(point * center, Vector * normal, Vector * up, float r, float g, float b);
 		patch(point * center, Vector * normal, Vector * up, float r, float g, float b, point * vertices);

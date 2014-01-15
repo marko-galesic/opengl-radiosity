@@ -1,0 +1,80 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 14.01.2014 18:59:25
+
+mtllib box_01.mtl
+
+#
+# object Object001
+#
+
+v  -1.0000 -1.0000 -1.0000
+v  1.0000 -1.0000 -1.0000
+v  -1.0000 1.0000 -1.0000
+v  1.0000 1.0000 -1.0000
+# 4 vertices
+
+g Object001
+usemtl 03___Default
+f 2 4 3 1 
+# 1 polygons
+
+#
+# object Object002
+#
+
+v  -1.0000 -1.0000 1.0000
+v  -1.0000 -1.0000 -1.0000
+v  -1.0000 1.0000 1.0000
+v  -1.0000 1.0000 -1.0000
+# 4 vertices
+
+g Object002
+usemtl 02___Default
+f 6 8 7 5 
+# 1 polygons
+
+#
+# object Object003
+#
+
+v  1.0000 -1.0000 1.0000
+v  1.0000 -1.0000 -1.0000
+v  1.0000 1.0000 1.0000
+v  1.0000 1.0000 -1.0000
+# 4 vertices
+
+g Object003
+usemtl 07___Default
+f 9 11 12 10 
+# 1 polygons
+
+#
+# object Object004
+#
+
+v  -1.0000 1.0000 1.0000
+v  1.0000 1.0000 1.0000
+v  -1.0000 1.0000 -1.0000
+v  1.0000 1.0000 -1.0000
+# 4 vertices
+
+g Object004
+usemtl 01___Default
+f 13 15 16 14 
+# 1 polygons
+
+#
+# object Object005
+#
+
+v  -1.0000 -1.0000 1.0000
+v  1.0000 -1.0000 1.0000
+v  -1.0000 -1.0000 -1.0000
+v  1.0000 -1.0000 -1.0000
+# 4 vertices
+
+g Object005
+usemtl 03___Default
+f 17 18 20 19 
+# 1 polygons
+

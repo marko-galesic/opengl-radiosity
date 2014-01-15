@@ -19,6 +19,14 @@ void radiosity()
 				renderPatch(&patches[p]);	
 			}
 			cout << endl;
+			
+			for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+			{
+				patches[p]._emission->_red = 0.0;
+				patches[p]._emission->_green = 0.0;	
+				patches[p]._emission->_blue = 0.0;	
+			}
+			
 			for(int p = 0; p < NUMBER_OF_PATCHES; p++)
 			{
 				cout << "\r" << "Calculating excident lighting\t" << ((float)p / (float)NUMBER_OF_PATCHES)  * 100 << "%"<< flush;
@@ -28,35 +36,18 @@ void radiosity()
 			cout << endl;
 						
 		}
-		/*
-		for(int p = 0; p < NUMBER_OF_PATCHES; p++)
-		{
-			checkWhetherPatchHasComponentMax(&patches[p], totalLight);	
-		}
 		
-		printLight(totalLight);		
-
-		for(int p = 0; p < NUMBER_OF_PATCHES; p++)
-		{
-			//patches[p]._excident->_red /= totalLight->_red;
-			//patches[p]._excident->_green /= totalLight->_green;
-			//patches[p]._excident->_blue /= totalLight->_blue;
-
-			if (patches[p]._excident->_red != 0.0 || patches[p]._excident->_green != 0.0 || patches[p]._excident->_blue)
-			{
-				if (DEBUG) cout << patches[p]._excident->_red << " " << patches[p]._excident->_green << " " << patches[p]._excident->_blue << endl;
-			}
-		}
-		*/
 }
 void renderPatch(patch * p)
 {
 	// Render bottom	
+	
+	//cout << "Color Before Incident Calculation: " << p->_incident->_red << " " << p->_incident->_green << " " << p->_incident->_blue << endl;
 	light * incident = calculauteIncidentLight(p->_center, p->_normal, p->_up);
 	p->_incident->_red = incident->_red;
 	p->_incident->_green = incident->_green;
 	p->_incident->_blue = incident->_blue;
-	if (DEBUG) cout << "Color After Incident Calculation: " << p->_incident->_red << " " << p->_incident->_green << " " << p->_incident->_blue << endl;
+	//cout << "Color After Incident Calculation: " << p->_incident->_red << " " << p->_incident->_green << " " << p->_incident->_blue << endl;
 	delete incident;
 }
 
@@ -66,6 +57,21 @@ void calculateExcident(patch * p)
 	p->_excident->_green = p->_incident->_green * p->_reflectance->_green + p->_excident->_green;
 	p->_excident->_blue = p->_incident->_blue * p->_reflectance->_blue + p->_excident->_blue;
 }
+
+light * excidentLightFromPatchWithId(int red, int green, int blue)
+{
+	light * excidentLight = new light(0.0, 0.0, 0.0);
+	for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+	{
+		if (patches[p]._id->_red == red && patches[p]._id->_green == green && patches[p]._id->_blue == blue)
+		{
+			excidentLight->_red = patches[p]._excident->_red;
+			excidentLight->_green = patches[p]._excident->_green;
+			excidentLight->_blue = patches[p]._excident->_blue;
+			return excidentLight;
+		}
+	}
+} 
 
 light * calculauteIncidentLight(point * center, Vector * normal, Vector * up)
 {
@@ -101,25 +107,26 @@ light * calculauteIncidentLight(point * center, Vector * normal, Vector * up)
 	// Hemicube front 
 	Vector * forwardDirection = add(center, normal);
 	renderHemicubeView(center, up, forwardDirection, FRONT);
-
+	
 	hemicube * h = new hemicube();
 	h->_left = getHemicubePixels(LEFT);
 	h->_right = getHemicubePixels(RIGHT);
 	h->_top = getHemicubePixels(TOP);
 	h->_bottom = getHemicubePixels(BOTTOM);
 	h->_front = getHemicubePixels(FRONT);
-	hemicube * result = applyMultiplierHemicube(h);
 	
-	light * topView = getTotalLightOfView(result, TOP);
-	light * bottomView = getTotalLightOfView(result, BOTTOM);
-	light * leftView = getTotalLightOfView(result, LEFT);
-	light * rightView = getTotalLightOfView(result, RIGHT);
-	light * frontView = getTotalLightOfView(result, FRONT);
+	//hemicube * result = applyMultiplierHemicube(h);
+	
+	light * topView = getTotalLightOfView(h, TOP);
+	light * bottomView = getTotalLightOfView(h, BOTTOM);
+	light * leftView = getTotalLightOfView(h, LEFT);
+	light * rightView = getTotalLightOfView(h, RIGHT);
+	light * frontView = getTotalLightOfView(h, FRONT);
 	
 
 	totalLight->_red 	+= topView->_red;
 	totalLight->_green 	+= topView->_green;
-	totalLight->_blue 	+= topView->_blue;
+	totalLight->_blue 	+= topView->_blue; 
 
 	totalLight->_red 	+= bottomView->_red;
 	totalLight->_green 	+= bottomView->_green;
@@ -136,7 +143,7 @@ light * calculauteIncidentLight(point * center, Vector * normal, Vector * up)
 	totalLight->_red 	+= frontView->_red;
 	totalLight->_green 	+= frontView->_green;
 	totalLight->_blue 	+= frontView->_blue;
-
+	
 	totalLight->_red /= totalPixels;
 	totalLight->_green /= totalPixels;
 	totalLight->_blue /= totalPixels;
@@ -147,6 +154,7 @@ light * calculauteIncidentLight(point * center, Vector * normal, Vector * up)
 	delete leftView;
 	delete rightView;
 	delete frontView;
+	
 	return totalLight;
 }
 
@@ -189,16 +197,29 @@ light * getTotalLightOfView(hemicube * h, HEMICUBE_VIEW view)
 			viewBuffer = h->_bottom;
 			break;
 	}
-
+	int red = 0;
+	int green = 0;
+	int blue = 0;
+	
 	for(int i = 0; i < WIDTH * HEIGHT * 3; i+=3)
 	{
 		pixelX++;
+		
+		red = (int)viewBuffer[i];
+		green = (int)viewBuffer[i + 1];
+		blue = (int)viewBuffer[i + 2];
+		if(red == 0 && green == 0 && blue == 0) continue;
 
-		totalLightOfView->_red += (int)viewBuffer[i] / 255.0;
 		
-		totalLightOfView->_green += (int)viewBuffer[i + 1] / 255.0;
+		light * pixelLight = excidentLightFromPatchWithId(red, green, blue);
+
+		applyMultiplier(pixelLight, view, i);
 		
-		totalLightOfView->_blue += (int)viewBuffer[i + 2] / 255.0;
+		totalLightOfView->_red += pixelLight->_red;
+		
+		totalLightOfView->_green += pixelLight->_green;
+		
+		totalLightOfView->_blue += pixelLight->_blue;
 
 		if (pixelX == WIDTH)
 		{
@@ -243,11 +264,13 @@ void printLight(light * l)
 
 void renderFunction()
 {
+	
 	if(running)
 	{
 		radiosity();
 		running = false;
 	}
+	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(90.0, 1.0, 1.0, 5.0);
@@ -256,7 +279,7 @@ void renderFunction()
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glLoadIdentity();
 	gluLookAt(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-	renderScene();
+	renderScene();	
 	glFlush();
 }
 
@@ -269,6 +292,23 @@ void renderScene()
 		glColor3f(patches[p]._excident->_red, patches[p]._excident->_green, patches[p]._excident->_blue);
 		
 		if (DEBUG) cout << "Color : " << patches[p]._excident->_red << " " << patches[p]._excident->_green << " " << patches[p]._excident->_blue << endl;
+		glBegin(GL_POLYGON);
+		for(int v = 0; v < patches[p].numVerts; v++)
+		{
+			if (DEBUG) cout << patches[p]._vertices[v]._x << " " << patches[p]._vertices[v]._y << " " << patches[p]._vertices[v]._z << endl;
+			glVertex3f(patches[p]._vertices[v]._x, patches[p]._vertices[v]._y, patches[p]._vertices[v]._z);
+		}
+		glEnd();
+	}
+}
+
+void renderBakingScene()
+{
+	for(int p = 0; p < NUMBER_OF_PATCHES; p++)
+	{
+		glColor3f((float)patches[p]._id->_red / 255.0, (float)patches[p]._id->_green / 255.0, (float)patches[p]._id->_blue / 255.0);
+
+		//cout << "Color : " << patches[p]._id->_red << " " << patches[p]._id->_green << " " << patches[p]._id->_blue << endl;
 		glBegin(GL_POLYGON);
 		for(int v = 0; v < patches[p].numVerts; v++)
 		{
@@ -326,10 +366,162 @@ void renderHemicubeView(point * center, Vector * up, Vector * direction, HEMICUB
 
 	glLoadIdentity();
 	gluLookAt(center->_x, center->_y, center->_z, direction->_x, direction->_y, direction->_z, up->_x, up->_y, up->_z); 
-	renderScene();
+	renderBakingScene();
+	
 }
 
 bool blah = true;
+
+void applyMultiplier(light * l, HEMICUBE_VIEW view, int pixelIndex)
+{
+	float 	WIDTH, 
+		HEIGHT, 
+		VIEW_X, 
+		VIEW_Y, 
+		PIXEL_HEIGHT_IN_DEGREES, 
+		PIXEL_WIDTH_IN_DEGREES, 
+		START_ANGLE_PX_CAMERA_X, 
+		START_ANGLE_PX_CAMERA_Y, 
+		START_ANGLE_PX_PATCH_X, 
+		START_ANGLE_PX_PATCH_Y;
+	const char * viewName;
+	switch(view)
+	{
+		case FRONT:
+			viewName = "FRONT";
+			WIDTH = WINDOW_WIDTH / 2;
+			HEIGHT = WINDOW_HEIGHT / 2;
+			VIEW_X = WINDOW_WIDTH / 4;
+			VIEW_Y = WINDOW_HEIGHT / 4;
+			PIXEL_HEIGHT_IN_DEGREES = 45.0 / (HEIGHT / 2.0);
+			PIXEL_WIDTH_IN_DEGREES = 45.0 / (WIDTH / 2.0);
+			START_ANGLE_PX_CAMERA_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_CAMERA_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			break;
+		case TOP:
+			viewName = "TOP";
+			WIDTH = WINDOW_WIDTH / 2;
+			HEIGHT = WINDOW_HEIGHT / 4;
+			VIEW_X = WINDOW_WIDTH / 4;
+			VIEW_Y = WINDOW_HEIGHT * 3 / 4;
+			PIXEL_HEIGHT_IN_DEGREES = 45.0 / HEIGHT;
+			PIXEL_WIDTH_IN_DEGREES = 45.0 / (WIDTH / 2.0);
+			START_ANGLE_PX_CAMERA_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_CAMERA_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_Y = 45.0 + PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			break;
+		case LEFT:
+			viewName = "LEFT";
+			WIDTH = WINDOW_WIDTH / 4;
+			HEIGHT = WINDOW_HEIGHT / 2;
+			VIEW_X = 0;
+			VIEW_Y = WINDOW_HEIGHT * 1 / 4;
+			PIXEL_HEIGHT_IN_DEGREES = 45.0 / (HEIGHT / 2.0);
+			PIXEL_WIDTH_IN_DEGREES = 45.0 / WIDTH;
+			START_ANGLE_PX_CAMERA_X = PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_CAMERA_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_X = 90.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			break;
+		case RIGHT:
+			viewName = "RIGHT";
+			WIDTH = WINDOW_WIDTH / 4;
+			HEIGHT = WINDOW_HEIGHT / 2;
+			VIEW_X = WINDOW_WIDTH * 3 / 4;
+			VIEW_Y = WINDOW_HEIGHT * 1 / 4;
+			PIXEL_HEIGHT_IN_DEGREES = 45.0 / (HEIGHT / 2.0);
+			PIXEL_WIDTH_IN_DEGREES = 45.0 / WIDTH;
+			START_ANGLE_PX_CAMERA_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_CAMERA_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_X = 45.0 + PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_Y = 45.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			break;
+		case BOTTOM:
+			viewName = "BOTTOM";
+			WIDTH = WINDOW_WIDTH / 2;
+			HEIGHT = WINDOW_HEIGHT / 4;
+			VIEW_X = WINDOW_WIDTH / 4;
+			VIEW_Y = 0;
+			PIXEL_HEIGHT_IN_DEGREES = 45.0 / HEIGHT;
+			PIXEL_WIDTH_IN_DEGREES = 45.0 / (WIDTH / 2.0);
+			START_ANGLE_PX_CAMERA_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_CAMERA_Y = PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_X = 45.0 - PIXEL_WIDTH_IN_DEGREES / 2.0;
+			START_ANGLE_PX_PATCH_Y = 90.0 - PIXEL_HEIGHT_IN_DEGREES / 2.0;
+			break;
+	}
+
+	/* 
+	 * Apply "Mulitiplier Hemicube"
+	 */
+
+	// Yaw (in degrees) between the current pixel's center and the direction of the camera
+	float yawPxCamera = START_ANGLE_PX_CAMERA_X - (PIXEL_WIDTH_IN_DEGREES * (pixelIndex % (int)WIDTH));
+
+	// Pitch (in degrees) between the current pixel's center and the direction of the camera
+	float pitchPxCamera = START_ANGLE_PX_CAMERA_Y - (PIXEL_HEIGHT_IN_DEGREES * (int)(pixelIndex / WIDTH));
+
+
+
+	float yawPxPatch = START_ANGLE_PX_PATCH_X;		// Yaw (in degrees) between the current pixel's center and the normal of the patch
+
+	switch(view)
+	{
+		case RIGHT:
+			yawPxPatch += PIXEL_WIDTH_IN_DEGREES * (pixelIndex % (int)WIDTH);
+			break;
+		default:
+			yawPxPatch -= PIXEL_WIDTH_IN_DEGREES * (pixelIndex % (int)WIDTH);
+			break;
+	}
+
+	float pitchPxPatch = START_ANGLE_PX_PATCH_Y;		// Pitch (in degrees) between the current pixel's center and the normal of the patch
+
+	switch(view)
+	{
+		case FRONT:
+			pitchPxPatch -= PIXEL_HEIGHT_IN_DEGREES * (int)(pixelIndex / WIDTH);
+			break;
+		case LEFT:
+			pitchPxPatch -= PIXEL_HEIGHT_IN_DEGREES * (int)(pixelIndex / WIDTH);
+			break;
+		case RIGHT:
+			pitchPxPatch -= PIXEL_HEIGHT_IN_DEGREES * (int)(pixelIndex / WIDTH);
+			break;
+		case BOTTOM:
+			pitchPxPatch -= PIXEL_HEIGHT_IN_DEGREES * (int)(pixelIndex / WIDTH);
+			break;
+		case TOP:
+			pitchPxPatch += PIXEL_WIDTH_IN_DEGREES * (int)(pixelIndex / WIDTH);
+			break;
+	}
+
+	float twoPi = 2.0 * 3.14159265359;
+
+	float perspectiveCompensationX = (yawPxCamera / 360.0) * twoPi;
+	float perspectiveCompensationY = (pitchPxCamera / 360.0) * twoPi;
+
+	float lambertCompensationX = (yawPxPatch / 360.0) * twoPi;
+	float lambertCompensationY = (pitchPxPatch / 360.0) * twoPi;
+	 
+	float perspectiveCompnesation = cos(perspectiveCompensationX) * cos(perspectiveCompensationY);
+	float lambertCompensation = cos(lambertCompensationX) * cos(lambertCompensationY);
+	
+	// TODO : unit conversion from 0 - 255 to 0 - 1 (?)
+	float redComponent = l->_red * perspectiveCompnesation * lambertCompensation;
+	float greenComponent = l->_green * perspectiveCompnesation * lambertCompensation;
+	float blueComponent = l->_blue * perspectiveCompnesation * lambertCompensation;
+	
+	l->_red = redComponent;
+	l->_green = greenComponent;
+	l->_blue = blueComponent;
+	
+	//png.close();
+}
+
 unsigned char * applyMultiplier(unsigned char * buffer, HEMICUBE_VIEW view)
 {
 	float 	WIDTH, 
@@ -584,9 +776,11 @@ unsigned char * getHemicubePixels(HEMICUBE_VIEW view)
 	buffer = (unsigned char *)malloc(WIDTH * HEIGHT * 3);
 
 	glReadPixels(VIEW_X, VIEW_Y, WIDTH, HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+	
+	
+
 	return buffer; 
 }
-
 
 void initializePatches()
 {
@@ -602,7 +796,10 @@ void initializePatches()
 	patches = new patch[shapes.size()];
 	
 	NUMBER_OF_PATCHES = shapes.size();
-	int verts = 0;	
+	int verts = 0;
+	int red = 0;
+	int green = 0;
+	int blue = 1;
 	for (size_t i = 0; i < shapes.size(); i++)
 	{	
 		int numberVertices = shapes[i].mesh.positions.size() / 3;
@@ -684,6 +881,34 @@ void initializePatches()
 
 		patches[i].numVerts = numberVertices;
 
+		patches[i]._id = new patchId();
+
+		//cout << red << " " << green << " " << blue << endl;
+		
+		patches[i]._id->_red = red;
+		patches[i]._id->_green = green;
+		patches[i]._id->_blue = blue;
+
+		if (red < 256)
+		{
+			if (green < 256)
+			{
+				if (blue < 256)
+				{
+					blue++;
+					if (blue == 256)
+					{
+						blue = 0;
+						green++;
+					}
+				}
+				if (green == 256)
+				{
+					green = 0;
+					red++;
+				}
+			}
+		}
 
 		centerX /= numberVertices;
 		centerY /= numberVertices;
@@ -693,6 +918,7 @@ void initializePatches()
 
 		if(DEBUG) cout << "Center        : " << patches[i]._center->_x << " " << patches[i]._center->_y << " " << patches[i]._center->_z << endl;
 
+		
 		/*
 		delete right;
 		delete upVector;
@@ -700,7 +926,7 @@ void initializePatches()
 		delete b;
 		*/
 	}
-	if(DEBUG) cout << NUMBER_OF_PATCHES << " patches" << endl;
+	cout << NUMBER_OF_PATCHES << " patches" << endl;
 		
 }
 
