@@ -1,35 +1,105 @@
 #include "vector.h"
 
-using namespace Vectormath;
+#ifndef _STRUCT_
+#define _STRUCT_
 
-namespace radiosity_structs
-{
-	struct light
+namespace entities
+{	
+	class Light
 	{
-		float _red;
-		float _green;
-		float _blue;
-		light(float red, float green, float blue);
-	};
+		public:
+			float _red;
+			float _green;
+			float _blue;
+			Light(float red, float green, float blue);
 
-	struct patch
-	{
-		light * _emission;
-		light * _reflectance;
-		light * _incident;
-		light * _excident;
-		point * _center;
-		Vector * _normal;
-		Vector * _up;
-		point * _vertices;
-		int numVerts;
+			const Light& operator+=(const Light& rhs )
+			{
+				_red += rhs._red;
+				_green += rhs._green;
+				_blue += rhs._blue;
+				return *this;
+			}
 		
-		patch();
-		patch(point * center, Vector * normal, Vector * up, float r, float g, float b);
-		patch(point * center, Vector * normal, Vector * up, float r, float g, float b, point * vertices);
+			const Light& operator-=(const Light& rhs )
+			{
+				_red -= rhs._red;
+				_green -= rhs._green;
+				_blue -= rhs._blue;
+				return *this;
+			}
+	};
+	
+	/**
+	 * Color is a normalized structure for rgb color
+	 */
+	class Color
+	{
+		public:
+			float _red;
+			float _green;
+			float _blue;
+
+			Color();
+			Color(double*, double*, double*);
+			Color(const Color&);
+			Color(float*);
+			~Color();
+
+			const Color& operator+=(const Color& rhs );
+			const Color& operator-=(const Color& rhs );
+			friend std::ostream& operator<<(std::ostream& os, const Color& color);
+			bool isBlack();
 	};
 
-	struct hemicube
+	/**
+	 * Flow of certain color through space at a certain intensity
+	 */
+	class Flux
+	{
+		private:
+			Color * _color;
+		public:
+			Flux(double, double, double);
+			Flux(const Color& color);
+			Flux();
+
+			float getRedFlux() const;
+			float getGreenFlux() const;
+			float getBlueFlux() const;
+			void setRedFlux(float);
+			void setGreenFlux(float);
+			void setBlueFlux(float);
+			void incrementFlux(float, float, float);
+			friend std::ostream& operator<<(std::ostream& os, const Flux& flux);
+			const Flux& operator+=(const Flux& other);
+			const Flux& operator/=(int other);
+	};
+	class Patch
+	{
+		public:
+			Color * _reflectance;
+			vecmath::Point * _center;
+			vecmath::Vector * _normal;
+			vecmath::Vector * _up;
+			int _numVerts;
+			vecmath::Point * _vertices;
+			Flux * _incident;
+			Flux * _excident;
+		
+			Patch();
+			Patch(vecmath::Point * center, vecmath::Vector * normal, vecmath::Vector * up, Color * reflectance);
+			Patch(vecmath::Point * center, vecmath::Vector * normal, vecmath::Vector * up, Color * reflectance, vecmath::Point * vertices, int numVerts);
+	};
+
+	class LightPatch: public Patch
+	{
+		public:
+			Color * _emission;
+			LightPatch(vecmath::Point * center, vecmath::Vector * normal, vecmath::Vector * up, Color * reflectance, Color * emitter, vecmath::Point * vertices, int numVerts);	
+	};
+
+	struct Hemicube
 	{
 		unsigned char * _left;
 		unsigned char * _right;
@@ -37,6 +107,8 @@ namespace radiosity_structs
 		unsigned char * _bottom;
 		unsigned char * _front;
 
-		~hemicube();
+		~Hemicube();
 	};
 }
+#else
+#endif
