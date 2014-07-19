@@ -1,5 +1,6 @@
 #include "struct.h"
 
+using namespace vecmath;
 using namespace entities;
 
 Color::Color()
@@ -64,6 +65,17 @@ Light::Light(float red, float green, float blue)
 	this->_blue = blue;
 }
 
+Patch::Patch()
+{
+	this->_center = new Point();
+	this->_normal = new Vector(0.0, 1.0, 0.0);
+	this->_up = new Vector(1.0, 0.0, 0.0);
+	this->_reflectance = new Color();
+	this->_vertices = NULL;
+	this->_numVerts = 0;
+	this->_incident = new Flux();
+	this->_excident = new Flux();
+}
 Patch::Patch(Point * center, Vector * normal, Vector * up, Color * reflectance)
 {
 	this->_center = center;
@@ -75,12 +87,25 @@ Patch::Patch(Point * center, Vector * normal, Vector * up, Color * reflectance)
 }
 Patch::Patch(Point * center, Vector * normal, Vector * up, Color * reflectance, Point * vertices, int numVerts)
 {
-	this->_center = center;
-	this->_normal = normal;
-	this->_up = up;
-	this->_reflectance = reflectance;
-	this->_vertices = vertices;
-	this->_numVerts = numVerts;
+	this->_center = new Point();
+	this->_normal = new Vector(0.0, 1.0, 0.0);
+	this->_up = new Vector(1.0, 0.0, 0.0);
+	this->_reflectance = new Color();
+	this->_vertices = NULL;
+	this->_numVerts = 0;
+	this->_incident = new Flux();
+	this->_excident = new Flux();
+}
+
+LightPatch::LightPatch()
+{
+	this->_center = new Point();
+	this->_normal = new Vector(0.0, 1.0, 0.0);
+	this->_up = new Vector(1.0, 0.0, 0.0);
+	this->_reflectance = new Color();
+	this->_vertices = NULL;
+	this->_numVerts = 0;
+	this->_emission = new Color();
 	this->_incident = new Flux();
 	this->_excident = new Flux();
 }

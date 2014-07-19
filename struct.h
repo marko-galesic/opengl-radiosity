@@ -3,6 +3,7 @@
 #ifndef _STRUCT_
 #define _STRUCT_
 
+
 namespace entities
 {	
 	class Light
@@ -96,6 +97,7 @@ namespace entities
 	{
 		public:
 			Color * _emission;
+			LightPatch();
 			LightPatch(vecmath::Point * center, vecmath::Vector * normal, vecmath::Vector * up, Color * reflectance, Color * emitter, vecmath::Point * vertices, int numVerts);	
 	};
 
