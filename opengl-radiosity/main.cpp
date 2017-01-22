@@ -6,8 +6,6 @@
 void render_function()
 {
 	using radiosity_application_constants::running;
-	using radiosity_application_constants::WINDOW_WIDTH;
-	using radiosity_application_constants::WINDOW_HEIGHT;
 
 	if (running)
 	{
@@ -19,7 +17,7 @@ void render_function()
 	gluPerspective(90.0, 1.0, 1.0, 5.0);
 
 	glMatrixMode(GL_MODELVIEW);
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	glViewport(0, 0, radiosity_application_constants::WINDOW_WIDTH, radiosity_application_constants::WINDOW_HEIGHT);
 	glLoadIdentity();
 	gluLookAt(0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 	radiosity::render_scene();

@@ -83,7 +83,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="geometry.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="radiosity.cpp" />
+    <ClCompile Include="radiosity_application_constants.cpp" />
     <ClCompile Include="radiosity_structs.cpp" />
     <ClCompile Include="vector.cpp" />
   </ItemGroup>

@@ -1,10 +1,10 @@
 #pragma once
 namespace radiosity_application_constants
 {
-	const int WINDOW_HEIGHT = 512;
-	const int WINDOW_WIDTH = 512;
+	extern const int WINDOW_HEIGHT;
+	extern const int WINDOW_WIDTH;
 
-	const int iterations = 2;
-	const int subdivisions = 1;
-	bool running = true;
+	extern const int iterations;
+	extern const int subdivisions;
+	extern bool running;
 }
