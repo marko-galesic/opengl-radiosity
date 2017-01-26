@@ -42,9 +42,9 @@ radiosity_structs::patch * demo_geometry::backPatch =
 				new radiosity_structs::quad
 				(
 					&vectormath::point(-1.0f, -1.0f, -1.0f),
-					&vectormath::point(-1.0f, 1.0f, -1.0f),
+					&vectormath::point(1.0f, -1.0f, -1.0f),
 					&vectormath::point(1.0f, 1.0f, -1.0f),
-					&vectormath::point(1.0f, -1.0f, -1.0f)
+					&vectormath::point(-1.0f, 1.0f, -1.0f)
 				)
 			},
 			1
