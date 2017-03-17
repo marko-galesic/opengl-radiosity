@@ -602,7 +602,7 @@ void initializePatches()
 	Point * center = NULL;
 	for (size_t patch = 0; patch < NUMBER_OF_PATCHES; patch++)
 	{	
-		if (emission->isBlack())
+		if (!emission || emission->isBlack())
 		{
 			emission = new Color(shapes[patch].material.emission);
 			excident = new Flux(*emission);
