@@ -3,10 +3,11 @@ opengl-radiosity
 
 A Radiosity Implementation with Hemicubes and OpenGL
 
-Use: 
+###### Compile: 
+g++ -o radiosity radiosity.cpp struct.cpp vector.cpp flux.cpp tiny_obj_loader.cc -lGLU -lGL -lglut
 
-g++ -o radiosity radiosity.cpp struct.cpp vector.cpp -lGLU -lGL -lglut
+###### Run	
+`./radiosity <geometry file> <number of iterations> <debug>`
 
-to compile
 
 Based on http://freespace.virgin.net/hugo.elias/radiosity/radiosity.htm
